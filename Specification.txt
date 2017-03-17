@@ -1,0 +1,141 @@
+UBF
+
+a usable Brainfuck
+
+--
+
+Table of Contents:
+- 0. Introduction
+- I. LFP
+- II. UBF
+- Appendices
+-	A. Standard Library
+-	B. Credits
+-	C. Dedication
+
+-----------------------------------------------------------------------------
+
+
+So I designed this with the goal of making Brainfuck usable and extensible,
+basically as just an exercise in interpreter design, a fun way of learning
+new shit in C++ (such as a lot of the language itself, how to use DLLS, how
+to bind Lua to C++, etc) and a challenge for myself. It also serves the
+express purpose of making me laugh, because as someone who loves to purposely
+make things do things against their purpose, the idea of making a purposely
+hard-to-use and painful language into a fairly usable, if minimalistic and
+borderline assembler-like, general-purpose programming language, pleases me
+greatly. Now then, on to the design itself.
+
+The interpreter takes two steps when interpreting: the Luafucker preprocessor
+(LFP, for short), and the UBF Ianterpreter (or just UBF, for short).
+
+------------------------------------ I. LFP ---------------------------------------
+
+First off the interpreter runs a preprocessor, which I gave the joke name of
+"Luafucker." Essentially, what it does is:
+- import modules for use
+- allow definition of new commands at the beginning of the file
+- throw exceptions in case of naming conflicts between libraries*
+
+(* note 1: the chances of two libraries using the same command name isn't
+super likely given that since we have the alphabet plus numbers we have
+36**36 possible commands, only 5 or 6 of which are reserved in the language
+itself)
+
+The code for the preprocessor, which can be stored in header files (a la C;
+these have the file extension .bh), or in the source code itself, in an area
+at the top of the file (also like C). The preprocessor takes commands and defines
+them as blocks of Lua code, because obviously the best way to implement a language
+is to cross-compile it into a better, already implemented, language. Here's an
+example of what that type of thing would look like.
+
+	// hello.bh - defines test program
+	HW : {
+		print("Hello, world!")
+	};
+
+As you can see, we are still restricted to the two-character commands of DBF, the
+direct predecessor of the language. This is largely due to laziness: Frankly, it's
+vastly easier to tokenize things when you already predictably know the length of the
+first token.
+
+In a source code file, the preprocessor code looks slightly different, and a bit hairier.
+Here is an example of a less-than-ideal, but still functional, Hello World program using
+this method:
+
+	// hello.ubf - Hello world program, the worse kind
+	##;
+	HW : {
+		print("Hello, world!")
+	};
+	##;
+	HW;
+
+As you can see, we use a double-hash command to begin and end our preprocessor. This is
+a significantly bigger pain in the ass for the interpreter because it has to iterate over
+the file's semicolon-delimited command list to find the first and last ## commands. However
+it may come in handy if you don't feel like writing a header file for your program, so as to
+maintain everything in a single file (because that'such good programming practice, right Draven?)
+
+Once the preprocessor is done defining commands, it strips the source code of the main file of any
+and all preprocessor directives and then sends the remaining pure-UBF source off to the raw UBF
+interpreter.
+
+------------------------------------- II. UBF -------------------------------------
+
+The UBF interpreter is a fairly simple while loop. You get a 65536-item stack of memory
+and a data pointer which moves along the stack. This is fairly standard Brainfuck fare,
+and it was also inherited from the DBF interpreter on which UBF is based.
+
+Here are the 6 (technically 7 because of the ## command) reserved commands:
+
+Command	|	Function
+FF x	-	Move the data pointer forward in the stack by int x
+BB x	-	Move the data pointer backward in the stack by int x
+II x	-	Increment the data at the pointer by int x
+DD x	-	Decrement the data at the pointer by int x
+JC x	-	Jump conditionally by int x lines if the data at the pointer is 0
+JU x	-	Jump unconditionally by int x lines
+(##)	-	Preprocessor directives start and end
+
+Outside of this, any and all other functionality must be extetnded by the UBF standard
+library, libraries you download, or libraries you write yrself (all of which are implemented
+in Lua, of course).
+
+This is pretty much it as far as the actual language goes.
+
+-----------------------------------------------------------------------------------
+APPENDICES:
+
+
+--- APPENDIX A. The UBF Standard Library
+
+We're not going to go into detail on the stuff each library in the UBF standard library
+provedes, but we'll just quickly go into the simple list and descriptions of what all you get.
+
+-----------------------------------------------------------------
+| Module		|	What you get			|
+----------------------------------------------------------------|
+| io.bh 		|	Basic input/output		|
+| file.bh		|	File I/O			|
+| math.bh		|	Math funcctions			|
+| random.bh		|	Pseudorandom number generator	|
+| string.bh		|	String functions		|
+-----------------------------------------------------------------
+
+More functionality will hopefully be added in the coming versions and updates, as that will be
+essentially the only thing left to add after basic interpreter functionality is in.
+
+--- APPENDIX B. Credits
+
+Designed and implemented by Draven Stedman (github.com/dravenstedman)
+Specification 1.0 finished 17 March 2017
+Implementation started 17 March 2017 and finished XX March 2017
+
+This language specification, the source code of the interpreter, and the standard library are
+all licenced under the GNU General Public Licence, version 3.0. See COPYING for details.
+
+--- APPENDIX C. Dedication
+
+Dedicated to Friday Jett
+(Love ya hun)
