@@ -1,6 +1,7 @@
 UBF
-
 a usable Brainfuck
+
+Specification, v1.1
 
 --
 
@@ -50,7 +51,7 @@ is to cross-compile it into a better, already implemented, language. Here's an
 example of what that type of thing would look like.
 
 	// hello.bh - defines test program
-	HW : {
+	NIL HW : {
 		print("Hello, world!")
 	};
 
@@ -58,6 +59,19 @@ As you can see, we are still restricted to the two-character commands of DBF, th
 direct predecessor of the language. This is largely due to laziness: Frankly, it's
 vastly easier to tokenize things when you already predictably know the length of the
 first token.
+
+You'll also notice that the preprocessor is strongly typed, that is, you have to declare
+exactly what the return type of yr new command is and (if you have arguments) exactly what
+type the arguments to yr command are. Here are the data types:
+
+NIL - analagous to C's void type; only usable as a return types
+INT - integer numbers
+FPN - floating point numbers
+STR - string
+
+There are currently no plans to implement complex data structures, but frankly the extensability
+of the language leads me to believe that if you really tried hard enough you could probably
+implement it yourself.
 
 In a source code file, the preprocessor code looks slightly different, and a bit hairier.
 Here is an example of a less-than-ideal, but still functional, Hello World program using
@@ -76,6 +90,22 @@ a significantly bigger pain in the ass for the interpreter because it has to ite
 the file's semicolon-delimited command list to find the first and last ## commands. However
 it may come in handy if you don't feel like writing a header file for your program, so as to
 maintain everything in a single file (because that'such good programming practice, right Draven?)
+
+Another note on the preprocessor: if the commands defined in the headers return anything, the returned
+value is pushed to the stack at the data pointer upon execution. Thus, it may be wise programming
+practice to make sure that when you execute such a function you're in a place on the stack you're
+okay with having overwritten. For example:
+
+	// test.bh
+	INT RE(INT x) : {	// Simply returns its input
+		return x;
+	}
+	// test.ubf
+	##;
+	IM test.bh;
+	##;
+	RE(100);		// this puts the number 100 in the stack, at the position currently
+				// pointed to by the data pointer
 
 Once the preprocessor is done defining commands, it strips the source code of the main file of any
 and all preprocessor directives and then sends the remaining pure-UBF source off to the raw UBF
@@ -129,7 +159,8 @@ essentially the only thing left to add after basic interpreter functionality is 
 --- APPENDIX B. Credits
 
 Designed and implemented by Draven Stedman (github.com/dravenstedman)
-Specification 1.0 finished 17 March 2017
+Specification 1.0 finished 16 March 2017
+Specification 1.1 finished 17 March 2017
 Implementation started 17 March 2017 and finished XX March 2017
 
 This language specification, the source code of the interpreter, and the standard library are
