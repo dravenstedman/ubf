@@ -1,0 +1,10 @@
+UBF [Usable Brainfuck]
+
+A Brainfuck derivative going completely against everything Brainfuck tried to do
+
+Designed and implemented by Draven Stedman
+
+Everything here is GPL v3 (See COPYING)
+
+See Specifiation.txt for formal UBF spec
+See source directory for source code
